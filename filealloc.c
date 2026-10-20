@@ -31,7 +31,7 @@ typedef struct{
   int index_block;
   int allocated;
 
-}Fileinfo;
+}FileInfo;
 
 Block* memory_head = NULL;
 int total_blocks =0;
@@ -91,6 +91,47 @@ int getFreeBlockCount(){
  
 }
 
+
+void contigousAlloction(FileInfo files[],int num_files){
+
+  resetMemory();
+  printf("\nCONTIGUOUS ALLOCATION\n");
+  printf("Directory\n");
+  printf("%-15s %-10s %-10s\n", "File Name", "Start", "Length");
+  for(int i=0;i<num_files;i++){
+    files[i].allocated = 0;
+    int attempts = 0;
+    int max_attempts = 999;
+    while(attempts<max_attempts){
+      int start_id = (rand()%total_blocks)+1;
+      int all_free=1;
+      for(int j =0;j<files[i].blocks_needed;j++){
+        Block *b = getBlockById(start_id+j);
+        if(b==NULL||b->is_free=0){
+           all_free=0;
+           break;
+        }
+      }
+      if(all_free){
+        for(int j =0;j<files[i].blocks_needed;j++){
+          Block* b = getBlockById(start_index+j);
+          b->is_free=0;
+          strcpy(b->filename,files[i].name);
+          files[i].start_block = start_id;
+          files[i].allocated=1;
+          printf("%-15s %-10d %-10d\n", files[i].name, files[i].start_block, files[i].blocks_needed);
+          break;
+        }
+      }
+      attempts++;
+    }
+    if (!files[i].allocated) {
+      printf("%-15s %-10s %-10s (Not enough contiguous memory)\n", files[i].name, "-", "-");
+    }
+  }
+}
+   
+  
      
 
 
