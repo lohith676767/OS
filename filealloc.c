@@ -130,6 +130,56 @@ void contigousAlloction(FileInfo files[],int num_files){
     }
   }
 }
+
+
+void linkedAllocation(FileInfo files[], int num_files) {
+    resetMemory();
+    printf("\nLINKED ALLOCATION\n");
+    printf("Directory\n");
+    printf("%-15s %-10s %-10s\n", "File Name", "Start", "End");
+    for(int i=0;i<num_files;i++){
+       if((files[i].blocks_needed)>getFreeBlockCount()){
+           printf("%-15s %-10s %-10s (Not enough total memory)\n", files[i].name, "-", "-");
+           files[i].allocated = 0;
+           continue;
+       }
+       int first_block = -1;
+       int prev_block = -1;
+       files[i].allocated=1;
+       for(int j=0;j<files[i].blocks_needed;j++){
+           int b_id;
+           Block *b;
+           do{
+               b_id = (rand()%total_blocks)+1;
+               b=getBlockById(b_id);
+           }while(b->is_free==0);
+           b->is_free=0;
+           strcpy(b->filename,files[i].name);
+           b->next_file_block = NULL;
+           if(first_block == -1){first_block=b_id;}
+           if(prev_block!=-1){
+               Block * pb = getBlockById(prev_block);
+               pb->next_file_block = b;
+           }
+           prev_block = b_id;
+       }
+       files[i].start_block = first_block;
+       files[i].end_block = prev_block;
+       printf("%-15s %-10d %-10d",files[i].name,files[i].start_block,files[i].end_block);
+    }
+    printf("\nIndvidual Listing \n");
+    for(int i =0;i<num_files;i++){
+        if(files[i].allocated){
+            printf("%-15s ", files[i].name);
+            Block* curr = getBlockById(files[i].start_block);
+            while(curr!=NULL){
+               printf("%d ", curr->block_id);
+               curr = curr->next_file_block;
+            }
+            printf("\n");
+        }
+     }
+}
    
   
      
